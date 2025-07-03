@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pakistan Admission Predictor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+
+<!-- Inside your <head> add this updated CSS -->
+<style>
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #1a1a1a, #121212);
+    color: #f1f1f1;
+    overflow-x: hidden;
+  }
+
+  .background-blobs {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.4;
+    animation: move 20s infinite alternate;
+  }
+
+  .blob1 { background: #6366f1; width: 400px; height: 400px; top: 5%; left: 5%; }
+  .blob2 { background: #ec4899; width: 300px; height: 300px; bottom: 10%; right: 10%; }
+
+  @keyframes move {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 80px); }
+  }
+
+  .form-wrapper {
+    max-width: 800px;
+    margin: 80px auto;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+
+  .form-control,
+  .form-select {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1px solid #444;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+  }
+
+  .form-select option {
+    background-color: #1f1f1f;
+    color: #fff;
+  }
+
+  .btn-primary {
+    background-color: #4f46e5;
+    border: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 14px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: #4338ca;
+    transform: translateY(-2px) scale(1.03);
+  }
+</style>
+
+</head>
+
+<body>
+
+<!-- Background Animation -->
+<div class="background-blobs">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+</div>
+
+<div class="form-wrapper w-full">
+  <h2 class="text-center mb-5">🎓 University Admission Predictor</h2>
+
+  <form class="w-full space-y-4" action="/predict" method="post">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Gender:</label>
+      <select name="gender" class="form-select" required>
+        {% for g in genders %}
+        <option value="{{ g }}">{{ g }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Matric Marks (out of 1200):</label>
+      <input type="number" name="matric_marks" class="form-control" required />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">FSc Marks (out of 1200):</label>
+      <input type="number" name="fsc_marks" class="form-control" required />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">University:</label>
+      <select name="university" id="university" class="form-select" onchange="updateCampusAndTestType()" required>
+        {% for u in universities %}
+        <option value="{{ u }}">{{ u }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Campus:</label>
+      <select name="campus" id="campus" class="form-select" required></select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Entry Test Type:</label>
+      <select name="entry_test_type" id="entry_test_type" class="form-select" onchange="updateTestMaxAndFields()" required></select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Entry Test Max Score:</label>
+      <input type="number" name="entry_test_max_score" id="entry_test_max_score" class="form-control" readonly required />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Entry Test Score:</label>
+      <input type="number" name="entry_test_score" class="form-control" min="0" step="0.01" required />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Province:</label>
+      <select name="province" class="form-select" required>
+        {% for p in provinces %}
+        <option value="{{ p }}">{{ p }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Field Applied:</label>
+      <select name="field_applied" id="field_applied" class="form-select" required></select>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <button type="submit" class="btn btn-primary w-100">🎯 Predict Admission</button>
+  </div>
+</form>
+
+</div>
+
+
+<script>
+  const campusData = {{ uni_campus_map|safe }};
+  const testData = {{ uni_test_map|safe }};
+
+  const testMaxMap = {
+    'ECAT': 400, 'MDCAT': 200, 'LAT': 100, 'NAT': 100, 'IBA Test': 100,
+    'IR Test': 100, 'Edu Test': 100, 'PolSci Test': 100, 'Math Test': 100,
+    'Physics Test': 100, 'Stats Test': 100, 'Islamic Test': 100, 'Chem Test': 100,
+    'Media Test': 100, 'Bio Test': 100, 'Pharma Test': 100, 'History Test': 100,
+    'Psych Test': 100, 'Anthropology Test': 100
+  };
+
+  const testFieldMap = {
+    'ECAT': ['Engineering'],
+    'MDCAT': ['Medical'],
+    'LAT': ['LLB'],
+    'IBA Test': ['Business'],
+    'IR Test': ['International Relations'],
+    'Edu Test': ['Education'],
+    'PolSci Test': ['Political Science'],
+    'Math Test': ['Mathematics'],
+    'Physics Test': ['Physics'],
+    'Stats Test': ['Statistics'],
+    'Islamic Test': ['Islamic Studies'],
+    'Chem Test': ['Chemistry'],
+    'Media Test': ['Media Sciences'],
+    'Bio Test': ['Biotechnology'],
+    'Pharma Test': ['Pharmacy'],
+    'History Test': ['History'],
+    'Psych Test': ['Psychology'],
+    'Anthropology Test': ['Anthropology'],
+    'NAT': ['Engineering', 'Computer Science', 'Business', 'Social Sciences']
+  };
+
+  const allFields = [
+    'Biotechnology', 'LLB', 'Psychology', 'Media Sciences', 'Anthropology',
+    'Physics', 'Mathematics', 'Pharmacy', 'Chemistry', 'Islamic Studies',
+    'History', 'Statistics', 'Engineering', 'Computer Science', 'Medical',
+    'Sociology', 'Education', 'International Relations', 'Business', 'Political Science'
+  ];
+
+  function updateCampusAndTestType() {
+    const uni = document.getElementById('university').value;
+
+    const campus = document.getElementById('campus');
+    campus.innerHTML = "";
+    if (campusData[uni]) {
+      campusData[uni].forEach(c => {
+        const option = document.createElement('option');
+        option.value = c;
+        option.textContent = c;
+        campus.appendChild(option);
+      });
+    }
+
+    const test = document.getElementById('entry_test_type');
+    test.innerHTML = "";
+    if (testData[uni]) {
+      testData[uni].forEach(t => {
+        const option = document.createElement('option');
+        option.value = t;
+        option.textContent = t;
+        test.appendChild(option);
+      });
+    }
+
+    updateTestMaxAndFields();
+  }
+
+  function updateTestMaxAndFields() {
+    const selectedTest = document.getElementById('entry_test_type').value;
+    const scoreInput = document.getElementById('entry_test_max_score');
+    scoreInput.value = testMaxMap[selectedTest] || 100;
+
+    const fieldDropdown = document.getElementById('field_applied');
+    fieldDropdown.innerHTML = "";
+    const fields = testFieldMap[selectedTest] || allFields;
+
+    fields.forEach(f => {
+      const option = document.createElement('option');
+      option.value = f;
+      option.textContent = f;
+      fieldDropdown.appendChild(option);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', updateCampusAndTestType);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% set chat_title = "Need Help with the Form? 📝" %}
+{% include 'chat_widget.html' %}
+
+</body>
+</html>

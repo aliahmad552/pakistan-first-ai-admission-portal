@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pakistan AI Admission Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    html { scroll-behavior: smooth; }
+    body, #landing { overflow-x: hidden; font-family: 'Poppins', sans-serif; }
+
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 1s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body class="text-slate-800">
+
+<!-- Landing Page -->
+<div id="landing" class="relative z-10 text-white text-center px-4 md:px-6 py-6 md:py-12 bg-cover bg-center min-h-screen"
+     style="background-image: url('{{ url_for('static', filename='image/uni.jpg') }}');">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm z-0"></div>
+
+  <!-- Top Logo + Title -->
+  <div class="relative z-10 flex items-center justify-start pl-6">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="h-16 w-16 mr-3" />
+    <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">Pakistan AI Admission Portal</h1>
+  </div>
+
+  <!-- Animated Introduction -->
+  <div class="relative z-10 mt-6 md:mt-12 max-w-3xl mx-auto px-4 md:px-0 bg-white/10 backdrop-blur-lg rounded-xl p-4 md:p-6 fade-in-up">
+    <p class="text-lg md:text-xl leading-relaxed text-white/90">
+  Welcome to the future of academic guidance! 🎓<br><br>
+  This is Pakistan’s first AI-powered admission portal, designed to assist students in making smart academic decisions. Using your Matric, FSC, and Entry Test scores, our system predicts your chances of selection in top universities across the country.<br><br>
+  🔍 With the help of SHAP (Explainable AI), we show exactly how your marks impact your admission — so you understand the “why” behind the prediction.<br><br>
+  🎯 You also get personalized field and university recommendations based on your academic profile and merit trends.<br><br>
+  💬 Need more help? Our built-in AI Chat Assistant is available on every page — ready to answer your admission-related queries in real time.<br><br>
+  Start now to explore your possibilities and plan your future with confidence!
+</p>
+
+    <a href="{{ url_for('form') }}"
+       class="mt-8 block w-full md:inline-block md:w-auto px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow-md hover:bg-gray-100 hover:scale-105 transition transform duration-300">
+      🎓 Get Started
+    </a>
+  </div>
+</div>
+
+<!-- White Wave Bottom -->
+<div class="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] z-0">
+  <svg class="relative block w-full h-24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1200 120">
+    <path d="M0,0 C600,120 600,0 1200,120 L1200,0 L0,0 Z" fill="#ffffff"></path>
+  </svg>
+</div>
+
+<!-- Main Form Section -->
+<div id="main-form"
+     class="hidden w-full min-h-screen flex items-center justify-center px-4 py-12 bg-no-repeat bg-cover bg-center relative"
+     style="background-image: url('{{ url_for('static', filename='image/your_new_image.jpg') }}');">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-md z-0"></div>
+
+  <div class="relative z-10 bg-white/90 backdrop-blur-lg shadow-xl rounded-2xl p-6 md:p-10 w-full max-w-4xl">
+    {% include 'form_section.html' %}
+  </div>
+</div>
+
+<!-- JS: Form Scroll + AI Chat -->
+<script>
+  function showForm() {
+    document.getElementById('landing').classList.add('hidden');
+    document.getElementById('main-form').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (typeof updateCampusAndTestType === "function") {
+      updateCampusAndTestType();
+    }
+  }
+
+  {% if prediction %}
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+  });
+  {% endif %}
+</script>
+<!-- AI Chat Widget -->
+
+
+</body>
+</html>
